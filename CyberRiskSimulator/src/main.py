@@ -1,7 +1,6 @@
 from Questionaire.Organisation import Organisation
 from Questionaire.Questions import ask_questions
 from Questionaire.Responses import Responses
-
 from Risk_engine.risk_calculator import RiskCalculator
 
 

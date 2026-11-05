@@ -2,17 +2,14 @@ from Questionaire.Organisation import Organisation
 from Questionaire.Questions import ask_questions
 from Questionaire.Responses import Responses
 
-from Database.database import Database
-from Database.models import Risk
+from Risk_engine.risk_calculator import RiskCalculator
 
 
 def main():
+
     print("=" * 50)
     print("        Cyber Risk Simulator")
     print("=" * 50)
-
-    # Create database
-    db = Database()
 
     # Create Organisation object
     organisation = Organisation()
@@ -20,33 +17,29 @@ def main():
     # Collect organisation information
     organisation.collect_details()
 
-    # Save organisation to database
-    db.add_organisation(organisation)
-
     # Ask cybersecurity questions
     answers = ask_questions()
 
-    # Store responses
+    # Save responses
     responses = Responses()
     responses.save_answers(answers)
 
-    # Example risk entry
-    risk = Risk(
-        name="Phishing Attack",
-        category="Social Engineering",
-        likelihood=4,
-        impact=5
-    )
-
-    db.add_risk(risk)
-
-    # Display results
+    # Display organisation details
     organisation.display_details()
+
+    # Display questionnaire responses
     responses.display_answers()
 
-    print("\nRisk Score:", risk.score())
+    # Calculate cyber risk
+    risk = RiskCalculator(answers)
+
+    risk.calculate_score()
+
+    # Display risk assessment
+    risk.display_results()
 
     print("\nAssessment Complete!")
+    print("Simulation module will be added in the next stage.")
 
 
 if __name__ == "__main__":

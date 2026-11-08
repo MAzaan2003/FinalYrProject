@@ -1,45 +1,75 @@
 from Questionaire.Organisation import Organisation
+
 from Questionaire.Questions import ask_questions
+
 from Questionaire.Responses import Responses
+
+
 from Risk_engine.risk_calculator import RiskCalculator
+
+
+from Reports.report_generator import ReportGenerator
+
+
 
 
 def main():
 
-    print("=" * 50)
-    print("        Cyber Risk Simulator")
+
     print("=" * 50)
 
-    # Create Organisation object
+    print("        Cyber Risk Simulator")
+
+    print("=" * 50)
+
+
+
     organisation = Organisation()
 
-    # Collect organisation information
+
     organisation.collect_details()
 
-    # Ask cybersecurity questions
+
+
     answers = ask_questions()
 
-    # Save responses
+
+
     responses = Responses()
-    responses.save_answers(answers)
 
-    # Display organisation details
-    organisation.display_details()
+    responses.save_answers(
+        answers
+    )
 
-    # Display questionnaire responses
-    responses.display_answers()
 
-    # Calculate cyber risk
-    risk = RiskCalculator(answers)
+
+    risk = RiskCalculator(
+        answers
+    )
+
 
     risk.calculate_score()
 
-    # Display risk assessment
-    risk.display_results()
 
-    print("\nAssessment Complete!")
-    print("Simulation module will be added in the next stage.")
+
+    report = ReportGenerator()
+
+
+
+    report.generate_report(
+
+        organisation,
+
+        answers,
+
+        risk.get_results()
+
+    )
+
+
+
 
 
 if __name__ == "__main__":
+
     main()

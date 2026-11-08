@@ -15,13 +15,14 @@ class Organisation:
         self.industry = input("Industry: ")
         self.employees = int(input("Number of Employees: "))
 
+    def display_details(self):
+        print("\n=== Organisation Details ===")
+        print(f"Organisation Name: {self.name}")
+        print(f"Industry: {self.industry}")
+        print(f"Number of Employees: {self.employees}")
+
 
 if __name__ == "__main__":
     organisation = Organisation()
     organisation.collect_details()
-
-    print("\nOrganisation Details")
-    print("Name:", organisation.name)
-    print("Industry:", organisation.industry)
-    print("Employees:", organisation.employees)
-    
+    organisation.display_details()

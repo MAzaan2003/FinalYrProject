@@ -1,44 +1,54 @@
+"""
+Questions.py
+
+Handles the cybersecurity questionnaire.
+"""
+
+
 def ask_questions():
 
-    print("\n========== Cyber Security Questionnaire ==========\n")
+    print("\n")
+    print("=" * 60)
+    print("          CYBER SECURITY QUESTIONNAIRE")
+    print("=" * 60)
 
 
-    questions = [
+    questions = {
 
-        "Do you use Multi-Factor Authentication (MFA)?",
+        1: "Do you use Multi-Factor Authentication (MFA)?",
 
-        "Do you regularly update operating systems?",
+        2: "Do you regularly update operating systems?",
 
-        "Are backups performed regularly?",
+        3: "Are backups performed regularly?",
 
-        "Are backups tested regularly?",
+        4: "Are backups tested regularly?",
 
-        "Do employees receive cybersecurity awareness training?",
+        5: "Do employees receive cybersecurity awareness training?",
 
-        "Is antivirus software installed on all devices?",
+        6: "Is antivirus software installed on all devices?",
 
-        "Do you have a firewall enabled?",
+        7: "Do you have a firewall enabled?",
 
-        "Are passwords changed regularly?",
+        8: "Are passwords changed regularly?",
 
-        "Do you encrypt sensitive company data?",
+        9: "Do you encrypt sensitive company data?",
 
-        "Do you use secure SQL queries (Prepared Statements)?"
+        10: "Do you use secure SQL queries (Prepared Statements)?"
 
-    ]
+    }
 
 
     answers = {}
 
 
-    for question in questions:
+    for question_id, question in questions.items():
 
 
         while True:
 
 
             answer = input(
-                question + " (yes/no): "
+                f"\n{question}\n(yes/no): "
             ).lower()
 
 
@@ -46,10 +56,15 @@ def ask_questions():
             if answer in ["yes", "no"]:
 
                 answers[question] = answer
+
                 break
 
 
-            print("Please enter yes or no.")
+            else:
+
+                print(
+                    "Please enter yes or no."
+                )
 
 
     return answers

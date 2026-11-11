@@ -1,3 +1,10 @@
+"""
+Responses.py
+
+Stores and displays questionnaire answers.
+"""
+
+
 class Responses:
 
 
@@ -13,14 +20,29 @@ class Responses:
 
 
 
+    def get_answers(self):
+
+        return self.answers
+
+
+
     def display_answers(self):
 
-        print("\n========== Questionnaire Responses ==========\n")
+
+        print("\n")
+        print("=" * 50)
+        print("       QUESTIONNAIRE RESPONSES")
+        print("=" * 50)
 
 
         for question, answer in self.answers.items():
 
-            print(question)
+            symbol = "✓" if answer == "yes" else "✗"
+
+
+            print(
+                f"{symbol} {question}"
+            )
 
             print(
                 f"Answer: {answer.upper()}\n"

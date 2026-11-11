@@ -26,4 +26,3 @@ if __name__ == "__main__":
     organisation = Organisation()
     organisation.collect_details()
     organisation.display_details()
-    

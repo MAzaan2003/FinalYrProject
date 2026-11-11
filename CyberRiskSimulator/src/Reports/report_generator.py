@@ -1,3 +1,10 @@
+"""
+report_generator.py
+
+Creates cybersecurity assessment reports.
+"""
+
+
 from datetime import datetime
 
 
@@ -5,8 +12,10 @@ from datetime import datetime
 class ReportGenerator:
 
 
+
     def generate_report(
             self,
+            user,
             organisation,
             answers,
             risk):
@@ -15,47 +24,50 @@ class ReportGenerator:
         print("\n")
 
         print("=" * 60)
-
         print("              CYBER RISK SIMULATOR")
-
         print("=" * 60)
 
 
 
         print(
-            f"\nAssessment Date: "
-            f"{datetime.now().strftime('%d %B %Y')}"
+            "\nAssessment Date:",
+            datetime.now().strftime("%d %B %Y")
+        )
+
+
+        print(
+            f"User: {user['username']}"
         )
 
 
 
-        print("\n------------------------------------------------")
-
+        print("\n")
+        print("-" * 50)
         print("ORGANISATION DETAILS")
-
-        print("------------------------------------------------")
+        print("-" * 50)
 
 
 
         print(
-            f"Organisation Name : {organisation.name}"
+            f"Organisation Name: {organisation.name}"
         )
+
 
         print(
-            f"Industry          : {organisation.industry}"
+            f"Industry: {organisation.industry}"
         )
+
 
         print(
-            f"Employees         : {organisation.employees}"
+            f"Employees: {organisation.employees}"
         )
 
 
 
-        print("\n------------------------------------------------")
-
-        print("CYBER SECURITY QUESTIONNAIRE")
-
-        print("------------------------------------------------")
+        print("\n")
+        print("-" * 50)
+        print("QUESTIONNAIRE RESULTS")
+        print("-" * 50)
 
 
 
@@ -66,35 +78,37 @@ class ReportGenerator:
 
 
             print(
-                f"{symbol} {question} : {answer.upper()}"
+                f"{symbol} {question}"
+            )
+
+            print(
+                f"Answer: {answer.upper()}"
             )
 
 
 
-        print("\n------------------------------------------------")
-
+        print("\n")
+        print("-" * 50)
         print("CYBER RISK ASSESSMENT")
-
-        print("------------------------------------------------")
+        print("-" * 50)
 
 
 
         print(
-            f"Risk Score : {risk['score']}%"
+            f"Risk Score: {risk['score']}%"
         )
 
 
         print(
-            f"Risk Level : {risk['level']}"
+            f"Risk Level: {risk['level']}"
         )
 
 
 
-        print("\n------------------------------------------------")
-
+        print("\n")
+        print("-" * 50)
         print("RECOMMENDATIONS")
-
-        print("------------------------------------------------")
+        print("-" * 50)
 
 
 
@@ -104,11 +118,11 @@ class ReportGenerator:
 
             "Regularly update systems.",
 
-            "Test backups.",
+            "Test backups regularly.",
 
-            "Train employees.",
+            "Provide cybersecurity awareness training.",
 
-            "Use prepared SQL statements.",
+            "Use secure SQL queries.",
 
             "Enable firewall protection."
 
@@ -116,24 +130,18 @@ class ReportGenerator:
 
 
 
-        for i, item in enumerate(
-            recommendations,
-            start=1
+        for number, recommendation in enumerate(
+                recommendations,
+                start=1
         ):
 
             print(
-                f"{i}. {item}"
+                f"{number}. {recommendation}"
             )
 
 
 
-        print("\n================================================")
-
-        print("Assessment Status : COMPLETE")
-
-        print("================================================")
-
-
-
-
-        
+        print("\n")
+        print("=" * 60)
+        print("Assessment Status: COMPLETE")
+        print("=" * 60)

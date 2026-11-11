@@ -1,70 +1,88 @@
-from Questionaire.Organisation import Organisation
+"""
+main.py
 
-from Questionaire.Questions import ask_questions
+Main entry point for the Cyber Risk Simulator.
+"""
 
-from Questionaire.Responses import Responses
-
-
-from Risk_engine.risk_calculator import RiskCalculator
-
-
-from Reports.report_generator import ReportGenerator
-
+from Database.database import create_database
+from Authentication.register import register
+from Authentication.login import login
+from Dashboard.dashboard import show_dashboard
 
 
 
 def main():
 
-
-    print("=" * 50)
-
-    print("        Cyber Risk Simulator")
-
-    print("=" * 50)
+    # Create database tables when program starts
+    create_database()
 
 
+    while True:
 
-    organisation = Organisation()
-
-
-    organisation.collect_details()
-
-
-
-    answers = ask_questions()
+        print("\n")
+        print("=" * 60)
+        print("              CYBER RISK SIMULATOR")
+        print("=" * 60)
 
 
+        print("""
+1. Register
 
-    responses = Responses()
+2. Login
 
-    responses.save_answers(
-        answers
-    )
+3. Exit
+
+""")
+
+
+        choice = input("Select option: ")
 
 
 
-    risk = RiskCalculator(
-        answers
-    )
+        # -------------------------
+        # REGISTER
+        # -------------------------
 
+        if choice == "1":
 
-    risk.calculate_score()
-
-
-
-    report = ReportGenerator()
+            register()
 
 
 
-    report.generate_report(
+        # -------------------------
+        # LOGIN
+        # -------------------------
 
-        organisation,
+        elif choice == "2":
 
-        answers,
+            user = login()
 
-        risk.get_results()
 
-    )
+            if user:
+
+                show_dashboard(user)
+
+
+
+        # -------------------------
+        # EXIT
+        # -------------------------
+
+        elif choice == "3":
+
+            print(
+                "\nThank you for using Cyber Risk Simulator."
+            )
+
+            break
+
+
+
+        else:
+
+            print(
+                "\nInvalid choice. Please select 1, 2 or 3."
+            )
 
 
 

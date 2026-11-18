@@ -1,93 +1,230 @@
 """
-login.py
+register.py
 
-Handles user login for the Cyber Risk Simulator.
+Handles new user registration for the Cyber Risk Simulator.
 """
 
 import hashlib
+import re
 from getpass import getpass
 
 from Database.database import get_connection
 
 
-MAX_LOGIN_ATTEMPTS = 3
-
 
 def hash_password(password):
-    """
-    Hash password using SHA-256.
-    """
 
     return hashlib.sha256(
         password.encode()
     ).hexdigest()
 
 
-def login():
+
+def validate_email(email):
+
+    pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
+
+    return re.match(pattern, email)
+
+
+
+def validate_password(password):
+
+    if len(password) < 8:
+        return False
+
+    if not re.search("[A-Z]", password):
+        return False
+
+    if not re.search("[a-z]", password):
+        return False
+
+    if not re.search("[0-9]", password):
+        return False
+
+    if not re.search("[!@#$%^&*]", password):
+        return False
+
+    return True
+
+
+
+def register():
 
     print("\n" + "=" * 60)
-    print("                    USER LOGIN")
+    print("              CREATE NEW ACCOUNT")
     print("=" * 60)
 
+
+
     connection = get_connection()
+
     cursor = connection.cursor()
 
-    attempts = 0
 
-    while attempts < MAX_LOGIN_ATTEMPTS:
 
-        email = input("\nEmail: ").strip().lower()
+    username = input("\nUsername: ").strip()
 
-        password = getpass("Password: ")
+
+
+    email = input(
+        "Email: "
+    ).strip().lower()
+
+
+
+    if not validate_email(email):
+
+        print("Invalid email format.")
+
+        connection.close()
+
+        return
+
+
+
+    while True:
+
+
+        password = getpass(
+            "Password: "
+        )
+
+
+        confirm = getpass(
+            "Confirm Password: "
+        )
+
+
+        if password != confirm:
+
+            print(
+                "Passwords do not match."
+            )
+
+            continue
+
+
+
+        if not validate_password(password):
+
+            print(
+                """
+Password requirements:
+
+- Minimum 8 characters
+- One uppercase letter
+- One lowercase letter
+- One number
+- One special character (!@#$%^&*)
+
+"""
+            )
+
+            continue
+
+
+        break
+
+
+
+    print("\n--- Organisation Details ---")
+
+    organisation_name = input(
+        "Organisation Name: "
+    )
+
+
+    industry = input(
+        "Industry: "
+    )
+
+
+
+    employees = int(
+        input(
+            "Number of Employees: "
+        )
+    )
+
+
+
+    try:
+
 
         cursor.execute(
             """
-            SELECT
-                user_id,
-                username,
-                email,
-                organisation_id
-
-            FROM users
-
-            WHERE email = ?
-            AND password = ?
-            """,
+            INSERT INTO organisations
             (
-                email,
-                hash_password(password)
+                name,
+                industry,
+                employees
+            )
+
+            VALUES (?, ?, ?)
+
+            """,
+
+            (
+                organisation_name,
+                industry,
+                employees
             )
         )
 
-        user = cursor.fetchone()
 
-        if user:
+        organisation_id = cursor.lastrowid
 
-            connection.close()
 
-            print("\nLogin successful.")
-            print(f"Welcome back, {user[1]}!")
 
-            return {
-                "user_id": user[0],
-                "username": user[1],
-                "email": user[2],
-                "organisation_id": user[3]
-            }
+        cursor.execute(
+            """
+            INSERT INTO users
+            (
+                username,
+                email,
+                password,
+                organisation_id
+            )
 
-        attempts += 1
+            VALUES (?, ?, ?, ?)
 
-        remaining = MAX_LOGIN_ATTEMPTS - attempts
+            """,
 
-        if remaining > 0:
+            (
+                username,
+                email,
+                hash_password(password),
+                organisation_id
+            )
+        )
 
-            print("\nInvalid email or password.")
-            print(f"Attempts remaining: {remaining}")
 
-        else:
 
-            print("\nMaximum login attempts reached.")
+        connection.commit()
 
-    connection.close()
 
-    return None
+
+        print(
+            "\nAccount created successfully!"
+        )
+
+
+
+    except Exception as error:
+
+
+        connection.rollback()
+
+        print(
+            "\nRegistration failed:"
+        )
+
+        print(error)
+
+
+
+    finally:
+
+
+        connection.close()

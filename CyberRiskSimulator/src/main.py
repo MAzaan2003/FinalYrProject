@@ -1,7 +1,7 @@
 """
 main.py
 
-Main application controller.
+Main entry point for Cyber Risk Simulator.
 """
 
 
@@ -13,41 +13,39 @@ from Authentication.login import login
 
 from Dashboard.dashboard import show_dashboard
 
-
+from utils.ui import banner, title, success, error
 
 
 
 def main():
 
 
-    # Create database tables
+    # Start database
 
     create_database()
+
+
+    # Display banner
+
+    banner()
+
+    title("CYBER RISK SIMULATOR")
 
 
 
     while True:
 
 
-        print("\n")
-
-        print("=" * 60)
-
-        print("             CYBER RISK SIMULATOR")
-
-        print("=" * 60)
+        print()
 
 
+        print("""
+        1. Register
 
-        print(
-        """
-1. Register
+        2. Login
 
-2. Login
-
-3. Exit
-        """
-        )
+        3. Exit
+        """)
 
 
 
@@ -57,40 +55,86 @@ def main():
 
 
 
+        # ==========================
         # REGISTER
+        # ==========================
 
         if choice == "1":
 
 
-            register()
+            try:
+
+                register()
+
+                success(
+                    "Registration completed."
+                )
 
 
+            except Exception as e:
 
-        # LOGIN
-
-        elif choice == "2":
-
-
-            user = login()
-
-
-
-            if user:
-
-
-                show_dashboard(
-                    user
+                error(
+                    f"Registration failed: {e}"
                 )
 
 
 
+        # ==========================
+        # LOGIN
+        # ==========================
+
+        elif choice == "2":
+
+
+            try:
+
+
+                user = login()
+
+
+
+                if user:
+
+
+                    success(
+                        "Login successful."
+                    )
+
+
+                    show_dashboard(
+                        user
+                    )
+
+
+                else:
+
+
+                    error(
+                        "Login failed."
+                    )
+
+
+
+            except Exception as e:
+
+
+                error(
+                    f"Login error: {e}"
+                )
+
+
+
+        # ==========================
         # EXIT
+        # ==========================
 
         elif choice == "3":
 
 
-            print(
-                "\nGoodbye."
+            print()
+
+            success(
+                "Thank you for using Cyber Risk Simulator."
             )
 
             break
@@ -100,8 +144,8 @@ def main():
         else:
 
 
-            print(
-                "\nInvalid option."
+            error(
+                "Invalid option. Please choose 1, 2 or 3."
             )
 
 

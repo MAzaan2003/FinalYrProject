@@ -13,45 +13,64 @@ from Authentication.login import login
 
 from Dashboard.dashboard import show_dashboard
 
-from utils.ui import banner, title, success, error
+
+def display_title():
+
+    print("\n" + "=" * 70)
+    print("              CYBER RISK SIMULATOR")
+    print("=" * 70)
 
 
 
 def main():
 
 
-    # Start database
+    try:
 
-    create_database()
+        # Initialise database
+
+        create_database()
 
 
-    # Display banner
+    except Exception as error:
 
-    banner()
 
-    title("CYBER RISK SIMULATOR")
+        print(
+            "\nDatabase startup failed."
+        )
+
+        print(error)
+
+        return
+
+
+
+    display_title()
 
 
 
     while True:
 
 
-        print()
-
-
         print("""
-        1. Register
 
-        2. Login
+------------------------------------------------------------
 
-        3. Exit
+1. Register Account
+
+2. Login
+
+3. Exit
+
+------------------------------------------------------------
+
         """)
 
 
 
         choice = input(
             "Select option: "
-        )
+        ).strip()
 
 
 
@@ -59,29 +78,32 @@ def main():
         # REGISTER
         # ==========================
 
+
         if choice == "1":
 
 
             try:
 
+
                 register()
 
-                success(
-                    "Registration completed."
+
+
+            except Exception as error:
+
+
+                print(
+                    "\nRegistration error:"
                 )
 
-
-            except Exception as e:
-
-                error(
-                    f"Registration failed: {e}"
-                )
+                print(error)
 
 
 
         # ==========================
         # LOGIN
         # ==========================
+
 
         elif choice == "2":
 
@@ -96,31 +118,20 @@ def main():
                 if user:
 
 
-                    success(
-                        "Login successful."
-                    )
-
-
                     show_dashboard(
                         user
                     )
 
 
-                else:
+
+            except Exception as error:
 
 
-                    error(
-                        "Login failed."
-                    )
-
-
-
-            except Exception as e:
-
-
-                error(
-                    f"Login error: {e}"
+                print(
+                    "\nLogin error:"
                 )
+
+                print(error)
 
 
 
@@ -128,14 +139,14 @@ def main():
         # EXIT
         # ==========================
 
+
         elif choice == "3":
 
 
-            print()
-
-            success(
-                "Thank you for using Cyber Risk Simulator."
+            print(
+                "\nThank you for using Cyber Risk Simulator."
             )
+
 
             break
 
@@ -144,8 +155,8 @@ def main():
         else:
 
 
-            error(
-                "Invalid option. Please choose 1, 2 or 3."
+            print(
+                "\nInvalid selection. Choose 1, 2 or 3."
             )
 
 

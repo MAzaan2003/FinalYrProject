@@ -1,7 +1,8 @@
 """
 database.py
 
-Handles database connection and table creation.
+Handles database connection and table creation
+for the Cyber Risk Simulator.
 """
 
 import sqlite3
@@ -26,6 +27,17 @@ def create_database():
     cursor = connection.cursor()
 
 
+
+    # Enable foreign keys
+
+    cursor.execute(
+        """
+        PRAGMA foreign_keys = ON
+        """
+    )
+
+
+
     # ==========================
     # ORGANISATIONS TABLE
     # ==========================
@@ -34,13 +46,17 @@ def create_database():
         """
         CREATE TABLE IF NOT EXISTS organisations
         (
+
             organisation_id INTEGER PRIMARY KEY AUTOINCREMENT,
 
-            name TEXT NOT NULL,
+            name TEXT NOT NULL UNIQUE,
 
             industry TEXT NOT NULL,
 
-            employees INTEGER NOT NULL
+            employees INTEGER NOT NULL,
+
+            created_date TEXT
+
         )
         """
     )
@@ -55,9 +71,10 @@ def create_database():
         """
         CREATE TABLE IF NOT EXISTS users
         (
+
             user_id INTEGER PRIMARY KEY AUTOINCREMENT,
 
-            username TEXT NOT NULL,
+            username TEXT NOT NULL UNIQUE,
 
             email TEXT UNIQUE NOT NULL,
 
@@ -65,10 +82,14 @@ def create_database():
 
             organisation_id INTEGER,
 
+            created_date TEXT,
+
             FOREIGN KEY
             (organisation_id)
+
             REFERENCES organisations
             (organisation_id)
+
         )
         """
     )
@@ -83,9 +104,12 @@ def create_database():
         """
         CREATE TABLE IF NOT EXISTS assessments
         (
+
             assessment_id INTEGER PRIMARY KEY AUTOINCREMENT,
 
             organisation_id INTEGER,
+
+            completed_by INTEGER,
 
             date TEXT,
 
@@ -93,10 +117,24 @@ def create_database():
 
             level TEXT,
 
+            maturity TEXT,
+
+            report_path TEXT,
+
+
             FOREIGN KEY
             (organisation_id)
+
             REFERENCES organisations
-            (organisation_id)
+            (organisation_id),
+
+
+            FOREIGN KEY
+            (completed_by)
+
+            REFERENCES users
+            (user_id)
+
         )
         """
     )
@@ -111,6 +149,7 @@ def create_database():
         """
         CREATE TABLE IF NOT EXISTS responses
         (
+
             response_id INTEGER PRIMARY KEY AUTOINCREMENT,
 
             assessment_id INTEGER,
@@ -119,10 +158,15 @@ def create_database():
 
             answer TEXT,
 
+
             FOREIGN KEY
             (assessment_id)
+
             REFERENCES assessments
             (assessment_id)
+
+            ON DELETE CASCADE
+
         )
         """
     )
@@ -132,3 +176,9 @@ def create_database():
     connection.commit()
 
     connection.close()
+
+
+
+    print(
+        "Database initialised successfully."
+    )

@@ -1,16 +1,21 @@
 """
-register.py
+login.py
 
-Handles new user registration for the Cyber Risk Simulator.
+Handles user login for the Cyber Risk Simulator.
 """
 
 import hashlib
+from getpass import getpass
+
 from Database.database import get_connection
+
+
+MAX_LOGIN_ATTEMPTS = 3
 
 
 def hash_password(password):
     """
-    Encrypts the password before storing it.
+    Hash password using SHA-256.
     """
 
     return hashlib.sha256(
@@ -18,110 +23,71 @@ def hash_password(password):
     ).hexdigest()
 
 
+def login():
 
-def register():
-
-    print("\n================================")
-    print("       CREATE NEW ACCOUNT")
-    print("================================\n")
-
-
-    # User details
-
-    username = input("Username: ")
-    email = input("Email: ")
-    password = input("Password: ")
-
-
-    # Organisation details
-
-    print("\n--- Organisation Details ---")
-
-    organisation_name = input("Organisation Name: ")
-    industry = input("Industry: ")
-
-    employees = int(
-        input("Number of Employees: ")
-    )
-
+    print("\n" + "=" * 60)
+    print("                    USER LOGIN")
+    print("=" * 60)
 
     connection = get_connection()
     cursor = connection.cursor()
 
+    attempts = 0
 
-    try:
+    while attempts < MAX_LOGIN_ATTEMPTS:
 
-        # Create organisation first
+        email = input("\nEmail: ").strip().lower()
 
-        cursor.execute(
-        """
-        INSERT INTO organisations
-        (
-            name,
-            industry,
-            employees
-        )
-
-        VALUES (?, ?, ?)
-
-        """,
-        (
-            organisation_name,
-            industry,
-            employees
-        ))
-
-
-        organisation_id = cursor.lastrowid
-
-
-
-        # Create user linked to organisation
+        password = getpass("Password: ")
 
         cursor.execute(
-        """
-        INSERT INTO users
-        (
-            username,
-            email,
-            password,
-            organisation_id
+            """
+            SELECT
+                user_id,
+                username,
+                email,
+                organisation_id
+
+            FROM users
+
+            WHERE email = ?
+            AND password = ?
+            """,
+            (
+                email,
+                hash_password(password)
+            )
         )
 
-        VALUES (?, ?, ?, ?)
+        user = cursor.fetchone()
 
-        """,
-        (
-            username,
-            email,
-            hash_password(password),
-            organisation_id
-        ))
+        if user:
 
+            connection.close()
 
+            print("\nLogin successful.")
+            print(f"Welcome back, {user[1]}!")
 
-        connection.commit()
+            return {
+                "user_id": user[0],
+                "username": user[1],
+                "email": user[2],
+                "organisation_id": user[3]
+            }
 
+        attempts += 1
 
-        print("\nAccount created successfully!")
-        print(
-            f"Organisation: {organisation_name}"
-        )
+        remaining = MAX_LOGIN_ATTEMPTS - attempts
 
+        if remaining > 0:
 
-    except Exception as error:
+            print("\nInvalid email or password.")
+            print(f"Attempts remaining: {remaining}")
 
-        connection.rollback()
+        else:
 
-        print(
-            "\nRegistration failed:"
-        )
+            print("\nMaximum login attempts reached.")
 
-        print(error)
+    connection.close()
 
-
-
-    finally:
-
-        connection.close()
-        
+    return None

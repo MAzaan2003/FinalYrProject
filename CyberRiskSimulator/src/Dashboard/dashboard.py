@@ -4,21 +4,29 @@ dashboard.py
 Main user dashboard after login.
 """
 
+
 from Questionaire.Questions import ask_questions
+
 from Risk_engine.risk_calculator import RiskCalculator
+
 from Reports.report_generator import ReportGenerator
+
 from Database.database import get_connection
+
+from datetime import datetime
 
 
 
 def show_dashboard(user):
 
+
     while True:
 
-        print("\n")
-        print("=" * 60)
-        print("              CYBER RISK DASHBOARD")
-        print("=" * 60)
+
+        print("\n" + "=" * 70)
+        print("                 CYBER RISK DASHBOARD")
+        print("=" * 70)
+
 
         print(
             f"\nWelcome, {user['username']}"
@@ -26,21 +34,25 @@ def show_dashboard(user):
 
 
         print("""
-------------------------------------------------
+------------------------------------------------------------
 
 1. Start Cyber Risk Assessment
 
 2. View Assessment History
 
-3. View Organisation Details
+3. Generate Latest Report
 
-4. Logout
+4. View Organisation Details
 
-------------------------------------------------
+5. Logout
+
+------------------------------------------------------------
         """)
 
 
-        choice = input("Select option: ")
+        choice = input(
+            "Select option: "
+        )
 
 
 
@@ -58,11 +70,17 @@ def show_dashboard(user):
 
         elif choice == "3":
 
-            view_organisation(user)
+            generate_report(user)
 
 
 
         elif choice == "4":
+
+            view_organisation(user)
+
+
+
+        elif choice == "5":
 
             print("\nLogging out...")
             break
@@ -79,16 +97,13 @@ def show_dashboard(user):
 
 def start_assessment(user):
 
-    print("\nStarting Cyber Security Assessment...\n")
 
+    print("\nStarting Cyber Risk Assessment...\n")
 
-    # Existing questionnaire
 
     answers = ask_questions()
 
 
-
-    # Existing risk calculator
 
     calculator = RiskCalculator(
         answers
@@ -102,15 +117,48 @@ def start_assessment(user):
 
 
 
-    print("\nAssessment Complete")
+    print("\n" + "=" * 70)
+    print("                 ASSESSMENT RESULT")
+    print("=" * 70)
+
 
     print(
-        f"Score: {result['score']}%"
+        f"\nRisk Score: {result['score']}%"
     )
+
 
     print(
         f"Risk Level: {result['level']}"
     )
+
+
+    print(
+        f"Security Maturity: {result['maturity']}"
+    )
+
+
+    print("\nRecommendations")
+
+    print("-" * 50)
+
+
+
+    if result["recommendations"]:
+
+
+        for item in result["recommendations"]:
+
+            print(
+                "- " + item
+            )
+
+
+    else:
+
+        print(
+            "No recommendations required."
+        )
+
 
 
     save_assessment(
@@ -120,8 +168,9 @@ def start_assessment(user):
     )
 
 
-
-    print("\nAssessment saved successfully.")
+    print(
+        "\nAssessment saved successfully."
+    )
 
 
 
@@ -129,34 +178,47 @@ def start_assessment(user):
 
 def save_assessment(user, result, answers):
 
+
     connection = get_connection()
 
     cursor = connection.cursor()
 
 
 
-    from datetime import datetime
-
-
     cursor.execute(
-    """
-    INSERT INTO assessments
-    (
-        organisation_id,
-        date,
-        score,
-        level
+        """
+        INSERT INTO assessments
+        (
+            organisation_id,
+            completed_by,
+            date,
+            score,
+            level,
+            maturity
+        )
+
+        VALUES (?, ?, ?, ?, ?, ?)
+
+        """,
+
+        (
+
+            user["organisation_id"],
+
+            user["user_id"],
+
+            datetime.now().strftime(
+                "%d/%m/%Y %H:%M"
+            ),
+
+            result["score"],
+
+            result["level"],
+
+            result["maturity"]
+
+        )
     )
-
-    VALUES (?, ?, ?, ?)
-
-    """,
-    (
-        user["organisation_id"],
-        datetime.now().strftime("%d/%m/%Y"),
-        result["score"],
-        result["level"]
-    ))
 
 
 
@@ -166,23 +228,30 @@ def save_assessment(user, result, answers):
 
     for question, answer in answers.items():
 
+
         cursor.execute(
-        """
-        INSERT INTO responses
-        (
-            assessment_id,
-            question,
-            answer
+            """
+            INSERT INTO responses
+            (
+                assessment_id,
+                question,
+                answer
+            )
+
+            VALUES (?, ?, ?)
+
+            """,
+
+            (
+
+                assessment_id,
+
+                question,
+
+                answer
+
+            )
         )
-
-        VALUES (?, ?, ?)
-
-        """,
-        (
-            assessment_id,
-            question,
-            answer
-        ))
 
 
 
@@ -194,7 +263,8 @@ def save_assessment(user, result, answers):
 
 
 
-def view_history(user):
+def generate_report(user):
+
 
     connection = get_connection()
 
@@ -203,17 +273,207 @@ def view_history(user):
 
 
     cursor.execute(
-    """
-    SELECT date, score, level
+        """
+        SELECT
+            score,
+            level,
+            maturity
 
-    FROM assessments
+        FROM assessments
 
-    WHERE organisation_id = ?
+        WHERE organisation_id = ?
 
-    """,
-    (
-        user["organisation_id"],
-    ))
+        ORDER BY assessment_id DESC
+
+        LIMIT 1
+
+        """,
+
+        (
+
+            user["organisation_id"],
+
+        )
+    )
+
+
+
+    result = cursor.fetchone()
+
+
+
+    if not result:
+
+
+        print(
+            "\nNo assessment found. Complete an assessment first."
+        )
+
+        connection.close()
+
+        return
+
+
+
+    cursor.execute(
+        """
+        SELECT
+            question,
+            answer
+
+        FROM responses
+
+        WHERE assessment_id =
+        (
+            SELECT MAX(assessment_id)
+
+            FROM assessments
+
+            WHERE organisation_id = ?
+        )
+
+        """,
+
+        (
+
+            user["organisation_id"],
+
+        )
+    )
+
+
+
+    responses = cursor.fetchall()
+
+
+
+    cursor.execute(
+        """
+        SELECT
+            name,
+            industry,
+            employees
+
+        FROM organisations
+
+        WHERE organisation_id = ?
+
+        """,
+
+        (
+
+            user["organisation_id"],
+
+        )
+    )
+
+
+
+    organisation_data = cursor.fetchone()
+
+
+    connection.close()
+
+
+
+    class Organisation:
+
+        def __init__(self, data):
+
+            self.name = data[0]
+
+            self.industry = data[1]
+
+            self.employees = data[2]
+
+
+
+    organisation = Organisation(
+        organisation_data
+    )
+
+
+
+    answers = dict(responses)
+
+
+
+    risk = {
+
+
+        "score": result[0],
+
+        "level": result[1],
+
+        "maturity": result[2],
+
+
+        "recommendations":
+
+        [
+
+            "Review unanswered security controls.",
+
+            "Improve employee cybersecurity awareness.",
+
+            "Maintain regular security reviews."
+
+        ]
+
+    }
+
+
+
+    report = ReportGenerator()
+
+
+
+    report.generate_report(
+
+        user,
+
+        organisation,
+
+        answers,
+
+        risk
+
+    )
+
+
+
+
+
+def view_history(user):
+
+
+    connection = get_connection()
+
+    cursor = connection.cursor()
+
+
+
+    cursor.execute(
+        """
+        SELECT
+            date,
+            score,
+            level
+
+        FROM assessments
+
+        WHERE organisation_id = ?
+
+        ORDER BY assessment_id DESC
+
+        """,
+
+        (
+
+            user["organisation_id"],
+
+        )
+    )
 
 
 
@@ -224,20 +484,28 @@ def view_history(user):
 
 
 
-    print("\n========== ASSESSMENT HISTORY ==========\n")
+    print("\n" + "=" * 60)
+    print("              ASSESSMENT HISTORY")
+    print("=" * 60)
+
 
 
     if not history:
 
-        print("No previous assessments found.")
+
+        print(
+            "\nNo previous assessments."
+        )
 
 
     else:
 
+
         for item in history:
 
+
             print(
-                f"Date: {item[0]}"
+                f"\nDate: {item[0]}"
             )
 
             print(
@@ -248,13 +516,14 @@ def view_history(user):
                 f"Risk Level: {item[2]}"
             )
 
-            print("-" * 30)
+            print("-" * 40)
 
 
 
 
 
 def view_organisation(user):
+
 
     connection = get_connection()
 
@@ -263,18 +532,24 @@ def view_organisation(user):
 
 
     cursor.execute(
-    """
-    SELECT name, industry, employees
+        """
+        SELECT
+            name,
+            industry,
+            employees
 
-    FROM organisations
+        FROM organisations
 
-    WHERE organisation_id = ?
+        WHERE organisation_id = ?
 
-    """,
-    (
-        user["organisation_id"],
-    ))
+        """,
 
+        (
+
+            user["organisation_id"],
+
+        )
+    )
 
 
     organisation = cursor.fetchone()
@@ -284,23 +559,36 @@ def view_organisation(user):
 
 
 
-    print("\n========== ORGANISATION ==========\n")
+    print("\n" + "=" * 60)
+    print("              ORGANISATION DETAILS")
+    print("=" * 60)
+
 
 
     if organisation:
 
-        print(
-            f"Name: {organisation[0]}"
-        )
 
         print(
-            f"Industry: {organisation[1]}"
+            "\nName:",
+            organisation[0]
         )
 
+
         print(
-            f"Employees: {organisation[2]}"
+            "Industry:",
+            organisation[1]
         )
+
+
+        print(
+            "Employees:",
+            organisation[2]
+        )
+
 
     else:
 
-        print("Organisation not found.")
+
+        print(
+            "Organisation not found."
+        )

@@ -4,13 +4,11 @@ report_generator.py
 Creates cybersecurity assessment reports.
 """
 
-
 from datetime import datetime
-
+import os
 
 
 class ReportGenerator:
-
 
 
     def generate_report(
@@ -18,130 +16,230 @@ class ReportGenerator:
             user,
             organisation,
             answers,
-            risk):
+            risk
+    ):
 
 
-        print("\n")
-
-        print("=" * 60)
-        print("              CYBER RISK SIMULATOR")
-        print("=" * 60)
-
-
-
-        print(
-            "\nAssessment Date:",
-            datetime.now().strftime("%d %B %Y")
+        report_date = datetime.now().strftime(
+            "%d %B %Y %H:%M"
         )
 
 
-        print(
-            f"User: {user['username']}"
+        filename = (
+            f"Cyber_Risk_Report_{user['username']}.txt"
         )
 
 
-
-        print("\n")
-        print("-" * 50)
-        print("ORGANISATION DETAILS")
-        print("-" * 50)
+        reports_folder = "Reports/generated_reports"
 
 
-
-        print(
-            f"Organisation Name: {organisation.name}"
+        os.makedirs(
+            reports_folder,
+            exist_ok=True
         )
 
 
-        print(
-            f"Industry: {organisation.industry}"
+        filepath = os.path.join(
+            reports_folder,
+            filename
         )
 
 
-        print(
-            f"Employees: {organisation.employees}"
-        )
+        with open(
+            filepath,
+            "w",
+            encoding="utf-8"
+        ) as file:
 
 
-
-        print("\n")
-        print("-" * 50)
-        print("QUESTIONNAIRE RESULTS")
-        print("-" * 50)
-
-
-
-        for question, answer in answers.items():
-
-
-            symbol = "✓" if answer == "yes" else "✗"
-
-
-            print(
-                f"{symbol} {question}"
+            file.write(
+                "=" * 70
+                + "\n"
             )
 
-            print(
-                f"Answer: {answer.upper()}"
+            file.write(
+                "              CYBER RISK SIMULATOR REPORT\n"
+            )
+
+            file.write(
+                "=" * 70
+                + "\n\n"
             )
 
 
 
-        print("\n")
-        print("-" * 50)
-        print("CYBER RISK ASSESSMENT")
-        print("-" * 50)
+            file.write(
+                f"Assessment Date: {report_date}\n"
+            )
 
 
-
-        print(
-            f"Risk Score: {risk['score']}%"
-        )
-
-
-        print(
-            f"Risk Level: {risk['level']}"
-        )
-
-
-
-        print("\n")
-        print("-" * 50)
-        print("RECOMMENDATIONS")
-        print("-" * 50)
-
-
-
-        recommendations = [
-
-            "Enable Multi-Factor Authentication.",
-
-            "Regularly update systems.",
-
-            "Test backups regularly.",
-
-            "Provide cybersecurity awareness training.",
-
-            "Use secure SQL queries.",
-
-            "Enable firewall protection."
-
-        ]
-
-
-
-        for number, recommendation in enumerate(
-                recommendations,
-                start=1
-        ):
-
-            print(
-                f"{number}. {recommendation}"
+            file.write(
+                f"User: {user['username']}\n\n"
             )
 
 
 
-        print("\n")
-        print("=" * 60)
-        print("Assessment Status: COMPLETE")
-        print("=" * 60)
+            file.write(
+                "-" * 70
+                + "\n"
+            )
+
+            file.write(
+                "ORGANISATION DETAILS\n"
+            )
+
+            file.write(
+                "-" * 70
+                + "\n"
+            )
+
+
+
+            file.write(
+                f"Organisation: {organisation.name}\n"
+            )
+
+
+            file.write(
+                f"Industry: {organisation.industry}\n"
+            )
+
+
+            file.write(
+                f"Employees: {organisation.employees}\n\n"
+            )
+
+
+
+            file.write(
+                "-" * 70
+                + "\n"
+            )
+
+            file.write(
+                "CYBERSECURITY ASSESSMENT RESULT\n"
+            )
+
+            file.write(
+                "-" * 70
+                + "\n"
+            )
+
+
+
+            file.write(
+                f"Risk Score: {risk['score']}%\n"
+            )
+
+
+            file.write(
+                f"Risk Level: {risk['level']}\n"
+            )
+
+
+            file.write(
+                f"Security Maturity: {risk['maturity']}\n\n"
+            )
+
+
+
+            file.write(
+                "-" * 70
+                + "\n"
+            )
+
+            file.write(
+                "QUESTIONNAIRE RESPONSES\n"
+            )
+
+            file.write(
+                "-" * 70
+                + "\n"
+            )
+
+
+
+            for question, answer in answers.items():
+
+
+                file.write(
+                    f"\nQuestion: {question}\n"
+                )
+
+
+                file.write(
+                    f"Answer: {answer.upper()}\n"
+                )
+
+
+
+            file.write(
+                "\n\n"
+            )
+
+
+            file.write(
+                "-" * 70
+                + "\n"
+            )
+
+            file.write(
+                "RECOMMENDATIONS\n"
+            )
+
+            file.write(
+                "-" * 70
+                + "\n"
+            )
+
+
+
+            if risk["recommendations"]:
+
+
+                for number, item in enumerate(
+                    risk["recommendations"],
+                    start=1
+                ):
+
+                    file.write(
+                        f"{number}. {item}\n"
+                    )
+
+
+            else:
+
+
+                file.write(
+                    "No recommendations required.\n"
+                )
+
+
+
+            file.write(
+                "\n"
+                + "=" * 70
+                + "\n"
+            )
+
+
+            file.write(
+                "Assessment Completed Successfully\n"
+            )
+
+
+            file.write(
+                "=" * 70
+                + "\n"
+            )
+
+
+
+        print("\nReport generated successfully.")
+
+        print(
+            f"Saved location: {filepath}"
+        )
+
+
+        return filepath

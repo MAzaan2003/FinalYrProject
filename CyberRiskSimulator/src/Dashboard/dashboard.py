@@ -41,7 +41,6 @@ def show_dashboard(user):
 
         print("""
 ------------------------------------------------------------
-
 1. Start Cyber Risk Assessment
 
 2. View Assessment History

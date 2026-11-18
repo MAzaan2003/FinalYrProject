@@ -11,9 +11,13 @@ from Risk_engine.risk_calculator import RiskCalculator
 
 from Reports.report_generator import ReportGenerator
 
+from Simulations.attack_simulator import run_simulator
+
 from Database.database import get_connection
 
 from datetime import datetime
+
+
 
 
 
@@ -24,7 +28,9 @@ def show_dashboard(user):
 
 
         print("\n" + "=" * 70)
+
         print("                 CYBER RISK DASHBOARD")
+
         print("=" * 70)
 
 
@@ -42,12 +48,15 @@ def show_dashboard(user):
 
 3. Generate Latest Report
 
-4. View Organisation Details
+4. Cyber Attack Simulator
 
-5. Logout
+5. View Organisation Details
+
+6. Logout
 
 ------------------------------------------------------------
         """)
+
 
 
         choice = input(
@@ -58,11 +67,13 @@ def show_dashboard(user):
 
         if choice == "1":
 
+
             start_assessment(user)
 
 
 
         elif choice == "2":
+
 
             view_history(user)
 
@@ -70,26 +81,42 @@ def show_dashboard(user):
 
         elif choice == "3":
 
+
             generate_report(user)
 
 
 
         elif choice == "4":
 
-            view_organisation(user)
+
+            run_simulator(user)
 
 
 
         elif choice == "5":
 
-            print("\nLogging out...")
+
+            view_organisation(user)
+
+
+
+        elif choice == "6":
+
+
+            print(
+                "\nLogging out..."
+            )
+
             break
 
 
 
         else:
 
-            print("\nInvalid option.")
+
+            print(
+                "\nInvalid option."
+            )
 
 
 
@@ -98,7 +125,9 @@ def show_dashboard(user):
 def start_assessment(user):
 
 
-    print("\nStarting Cyber Risk Assessment...\n")
+    print(
+        "\nStarting Cyber Risk Assessment...\n"
+    )
 
 
     answers = ask_questions()
@@ -110,7 +139,9 @@ def start_assessment(user):
     )
 
 
+
     calculator.calculate_score()
+
 
 
     result = calculator.get_results()
@@ -118,8 +149,11 @@ def start_assessment(user):
 
 
     print("\n" + "=" * 70)
+
     print("                 ASSESSMENT RESULT")
+
     print("=" * 70)
+
 
 
     print(
@@ -137,6 +171,7 @@ def start_assessment(user):
     )
 
 
+
     print("\nRecommendations")
 
     print("-" * 50)
@@ -148,12 +183,14 @@ def start_assessment(user):
 
         for item in result["recommendations"]:
 
+
             print(
                 "- " + item
             )
 
 
     else:
+
 
         print(
             "No recommendations required."
@@ -166,6 +203,7 @@ def start_assessment(user):
         result,
         answers
     )
+
 
 
     print(
@@ -275,6 +313,7 @@ def generate_report(user):
     cursor.execute(
         """
         SELECT
+
             score,
             level,
             maturity
@@ -290,9 +329,7 @@ def generate_report(user):
         """,
 
         (
-
             user["organisation_id"],
-
         )
     )
 
@@ -306,7 +343,7 @@ def generate_report(user):
 
 
         print(
-            "\nNo assessment found. Complete an assessment first."
+            "\nNo assessment available."
         )
 
         connection.close()
@@ -315,130 +352,16 @@ def generate_report(user):
 
 
 
-    cursor.execute(
-        """
-        SELECT
-            question,
-            answer
-
-        FROM responses
-
-        WHERE assessment_id =
-        (
-            SELECT MAX(assessment_id)
-
-            FROM assessments
-
-            WHERE organisation_id = ?
-        )
-
-        """,
-
-        (
-
-            user["organisation_id"],
-
-        )
+    print(
+        "\nLatest assessment found."
     )
 
-
-
-    responses = cursor.fetchall()
-
-
-
-    cursor.execute(
-        """
-        SELECT
-            name,
-            industry,
-            employees
-
-        FROM organisations
-
-        WHERE organisation_id = ?
-
-        """,
-
-        (
-
-            user["organisation_id"],
-
-        )
+    print(
+        "Report generation ready."
     )
-
-
-
-    organisation_data = cursor.fetchone()
 
 
     connection.close()
-
-
-
-    class Organisation:
-
-        def __init__(self, data):
-
-            self.name = data[0]
-
-            self.industry = data[1]
-
-            self.employees = data[2]
-
-
-
-    organisation = Organisation(
-        organisation_data
-    )
-
-
-
-    answers = dict(responses)
-
-
-
-    risk = {
-
-
-        "score": result[0],
-
-        "level": result[1],
-
-        "maturity": result[2],
-
-
-        "recommendations":
-
-        [
-
-            "Review unanswered security controls.",
-
-            "Improve employee cybersecurity awareness.",
-
-            "Maintain regular security reviews."
-
-        ]
-
-    }
-
-
-
-    report = ReportGenerator()
-
-
-
-    report.generate_report(
-
-        user,
-
-        organisation,
-
-        answers,
-
-        risk
-
-    )
 
 
 
@@ -456,6 +379,7 @@ def view_history(user):
     cursor.execute(
         """
         SELECT
+
             date,
             score,
             level
@@ -469,9 +393,7 @@ def view_history(user):
         """,
 
         (
-
             user["organisation_id"],
-
         )
     )
 
@@ -485,7 +407,9 @@ def view_history(user):
 
 
     print("\n" + "=" * 60)
+
     print("              ASSESSMENT HISTORY")
+
     print("=" * 60)
 
 
@@ -494,7 +418,7 @@ def view_history(user):
 
 
         print(
-            "\nNo previous assessments."
+            "No assessments found."
         )
 
 
@@ -508,15 +432,20 @@ def view_history(user):
                 f"\nDate: {item[0]}"
             )
 
+
             print(
                 f"Score: {item[1]}%"
             )
+
 
             print(
                 f"Risk Level: {item[2]}"
             )
 
-            print("-" * 40)
+
+            print(
+                "-" * 40
+            )
 
 
 
@@ -534,6 +463,7 @@ def view_organisation(user):
     cursor.execute(
         """
         SELECT
+
             name,
             industry,
             employees
@@ -545,14 +475,14 @@ def view_organisation(user):
         """,
 
         (
-
             user["organisation_id"],
-
         )
     )
 
 
+
     organisation = cursor.fetchone()
+
 
 
     connection.close()
@@ -560,7 +490,9 @@ def view_organisation(user):
 
 
     print("\n" + "=" * 60)
+
     print("              ORGANISATION DETAILS")
+
     print("=" * 60)
 
 
@@ -569,20 +501,17 @@ def view_organisation(user):
 
 
         print(
-            "\nName:",
-            organisation[0]
+            f"\nName: {organisation[0]}"
         )
 
 
         print(
-            "Industry:",
-            organisation[1]
+            f"Industry: {organisation[1]}"
         )
 
 
         print(
-            "Employees:",
-            organisation[2]
+            f"Employees: {organisation[2]}"
         )
 
 

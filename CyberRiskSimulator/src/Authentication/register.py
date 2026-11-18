@@ -6,6 +6,7 @@ Handles new user registration for the Cyber Risk Simulator.
 
 import hashlib
 import re
+
 from getpass import getpass
 
 from Database.database import get_connection
@@ -24,7 +25,10 @@ def validate_email(email):
 
     pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
 
-    return re.match(pattern, email)
+    return re.match(
+        pattern,
+        email
+    )
 
 
 
@@ -49,6 +53,29 @@ def validate_password(password):
 
 
 
+def enter_password():
+
+    show = input(
+        "Show password? (y/n): "
+    ).lower()
+
+
+
+    if show == "y":
+
+        return input(
+            "Password: "
+        )
+
+
+    else:
+
+        return getpass(
+            "Password: "
+        )
+
+
+
 def register():
 
     print("\n" + "=" * 60)
@@ -63,7 +90,9 @@ def register():
 
 
 
-    username = input("\nUsername: ").strip()
+    username = input(
+        "\nUsername: "
+    ).strip()
 
 
 
@@ -75,7 +104,9 @@ def register():
 
     if not validate_email(email):
 
-        print("Invalid email format.")
+        print(
+            "Invalid email format."
+        )
 
         connection.close()
 
@@ -86,20 +117,18 @@ def register():
     while True:
 
 
-        password = getpass(
-            "Password: "
-        )
+        password = enter_password()
 
 
-        confirm = getpass(
-            "Confirm Password: "
-        )
+        confirm = enter_password()
+
 
 
         if password != confirm:
 
+
             print(
-                "Passwords do not match."
+                "\nPasswords do not match."
             )
 
             continue
@@ -108,15 +137,16 @@ def register():
 
         if not validate_password(password):
 
+
             print(
                 """
 Password requirements:
 
-- Minimum 8 characters
-- One uppercase letter
-- One lowercase letter
-- One number
-- One special character (!@#$%^&*)
+✓ Minimum 8 characters
+✓ One uppercase letter
+✓ One lowercase letter
+✓ One number
+✓ One special character
 
 """
             )
@@ -124,11 +154,17 @@ Password requirements:
             continue
 
 
+
         break
 
 
 
-    print("\n--- Organisation Details ---")
+
+    print(
+        "\n--- Organisation Details ---"
+    )
+
+
 
     organisation_name = input(
         "Organisation Name: "
@@ -141,11 +177,24 @@ Password requirements:
 
 
 
-    employees = int(
-        input(
-            "Number of Employees: "
-        )
-    )
+    while True:
+
+        try:
+
+            employees = int(
+                input(
+                    "Number of Employees: "
+                )
+            )
+
+            break
+
+
+        except ValueError:
+
+            print(
+                "Please enter numbers only."
+            )
 
 
 
@@ -166,11 +215,16 @@ Password requirements:
             """,
 
             (
+
                 organisation_name,
+
                 industry,
+
                 employees
+
             )
         )
+
 
 
         organisation_id = cursor.lastrowid
@@ -192,10 +246,15 @@ Password requirements:
             """,
 
             (
+
                 username,
+
                 email,
+
                 hash_password(password),
+
                 organisation_id
+
             )
         )
 
@@ -209,12 +268,17 @@ Password requirements:
             "\nAccount created successfully!"
         )
 
+        print(
+            f"Welcome {username}"
+        )
+
 
 
     except Exception as error:
 
 
         connection.rollback()
+
 
         print(
             "\nRegistration failed:"
